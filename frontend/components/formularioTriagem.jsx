@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { type } from '../../node_modules/@types/react/experimental.d';
-import set from '../../node_modules/lodash-es/set';
 
 export function FormularioTriagem({ onNovaTriagem }) {
     const [petId, setPetId] = useState("");
@@ -9,7 +7,7 @@ export function FormularioTriagem({ onNovaTriagem }) {
     async function handleSubmit(e) {
         e.preventDefault();
 
-        const resposta = await fetch("http://localhost:3001/api/triagens", {
+        const resposta = await fetch("http://localhost:3001/triagens", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
