@@ -1,17 +1,15 @@
-export function listaTriagem ({ triagens }) {
-
+export function ListaTriagem({ triagens }) {
     return (
         <div>
-            <h2>Lista de Triagem</h2>
-            <table>
+            <h2>Lista de Triagens</h2>
+            <table className="table table-striped">
                 <thead>
                     <tr>
-                       <th>Senha</th>
-                       <th>Prioridade</th>
-                       <th>Hora de Chegada</th>
+                        <th>Senha</th>
+                        <th>Prioridade</th>
+                        <th>Hora de Chegada</th>
                     </tr>
                 </thead>
-
                 <tbody>
                     {triagens.map((triagem) => (
                         <tr key={triagem.id}>
