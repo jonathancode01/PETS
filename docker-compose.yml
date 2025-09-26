@@ -1,5 +1,3 @@
-version: '3.3'
-
 services:
   backend:
     build: ./backend
@@ -10,16 +8,35 @@ services:
       - ./backend:/app
     depends_on:
       - frontend
+      - pgsql
     environment:
       - NODE_ENV=development
+      - DB_HOST=pgsql
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=postgres
 
   frontend:
     build: ./frontend
     container_name: petshop-frontend
     ports:
       - "3001:80"
-    volumes:
-      - ./frontend:/usr/share/nginx/html
-
     environment:
       - CHOKIDAR_USEPOLLING=true
+
+  pgsql:
+    image: postgres:12.17
+    container_name: pgsql
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  pgdata:
