@@ -4,7 +4,7 @@ export default function TV() {
   const [fila, setFila] = useState([]);
 
   useEffect(() => {
-    // 🔹 Simulação: em produção você faria GET no backend (ex: GET /fila)
+
     const mockFila = [
       { id: 1, tutor: "Maria", pet: "Rex", especie: "Cachorro", status: "Aguardando" },
       { id: 2, tutor: "João", pet: "Mimi", especie: "Gato", status: "Aguardando" },
@@ -12,7 +12,7 @@ export default function TV() {
     ];
     setFila(mockFila);
 
-    // Atualiza a cada 5s (simulação de polling)
+
     const interval = setInterval(() => {
       console.log("🔄 Atualizando fila...");
       setFila(mockFila);

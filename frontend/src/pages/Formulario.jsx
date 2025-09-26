@@ -8,26 +8,26 @@ export default function Formulario() {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log({ nome, pet, especie });
-    alert("Pet adicionado à fila!"); // Feedback para o usuário
+    alert("Pet adicionado à fila!"); 
     setNome("");
     setPet("");
     setEspecie("");
   };
 
   return (
-    // Fundo da página com um cinza bem claro para dar contraste
+
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <form
         onSubmit={handleSubmit}
-        // O card do formulário: fundo branco, sombra, e mais espaçamento
+
         className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md space-y-4"
       >
-        {/* Título usando a cor escura principal da paleta */}
+
         <h1 className="text-3xl font-bold mb-6 text-center text-unipett-dark">
           Cadastro na Fila de Atendimento
         </h1>
 
-        {/* Estilização dos labels e inputs */}
+
         <div>
           <label htmlFor="tutor" className="block mb-1 text-sm font-medium text-gray-700">Nome do Tutor</label>
           <input
@@ -35,7 +35,7 @@ export default function Formulario() {
             type="text"
             value={nome}
             onChange={(e) => setNome(e.target.value)}
-            // Bordas suaves e um anel de foco na cor azul primária
+
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-unipett-blue-primary"
             required
           />
@@ -69,7 +69,7 @@ export default function Formulario() {
           </select>
         </div>
 
-        {/* Botão de submit usando o azul primário da marca */}
+
         <button
           type="submit"
           className="w-full bg-unipett-blue-primary text-white font-bold p-3 rounded-lg hover:bg-unipett-blue-dark transition-colors duration-300"
