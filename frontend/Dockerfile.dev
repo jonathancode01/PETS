@@ -1,0 +1,19 @@
+# Usa a imagem oficial do Node
+FROM node:lts-alpine
+
+# Define o diretório de trabalho
+WORKDIR /app
+
+# Copia o package.json e instala as dependências
+COPY package*.json ./
+RUN npm install
+
+# Copia o resto do código
+COPY . .
+
+# Expõe a porta do Vite
+EXPOSE 5173
+
+# Comando para iniciar o servidor de desenvolvimento do Vite
+# O --host permite acessar o servidor de fora do container
+CMD ["npm", "run", "dev", "--", "--host"]

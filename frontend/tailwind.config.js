@@ -6,15 +6,20 @@ export default {
   ],
   theme: {
     extend: {
+      // Aqui adicionamos nossas cores customizadas
       colors: {
-        'unipett-green-light': '#C6D57E',
-        'unipett-green': '#A2B970',
-        'unipett-teal': '#6A999C',
-        'unipett-blue-light': '#A9D6E5',
-        'unipett-blue-primary': '#468FAF',
-        'unipett-blue-dark': '#01497C',
-        'unipett-pink': '#E56B9F',
-        'unipett-dark': '#2B2D42',
+        'brand-dark': '#2A2E34', // O cinza escuro do fundo
+        'brand-pink': '#E66A9D', // O rosa principal do logo
+        'brand-blue': {
+          light: '#A1C6E4',
+          DEFAULT: '#3B8DCC', // Um azul padrão da paleta
+          dark: '#004A8D',   // O azul mais escuro
+        },
+        'brand-green': {
+          light: '#C7E8AA',
+          DEFAULT: '#6ABEA7', // O verde/água padrão
+        },
+        'brand-gray-light': '#F3F4F6', // O cinza bem claro/quase branco
       }
     },
   },

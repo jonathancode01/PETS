@@ -1,26 +1,25 @@
-import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
-import Formulario from "./pages/Formulario";
-import TV from "./pages/TV";
+import { Routes, Route, Link } from 'react-router-dom';
+import TV from './pages/TV.jsx';
+import Formulario from './pages/formulario.jsx';
 
 function App() {
   return (
-
-    <BrowserRouter>
-      <nav style={{ padding: '10px', background: '#eee', marginBottom: '20px' }}>
-        <Link to="/" style={{ marginRight: '15px' }}>
-          📝 Formulário de Cadastro
-        </Link>
-        <Link to="/tv">
-          📺 Tela da Fila (TV)
-        </Link>
+    <div>
+      {/* Menu de Navegação Simples */}
+      <nav className="bg-gray-800 p-4 text-white">
+        <Link to="/" className="mr-4 hover:text-gray-300">Lista de Atendimento</Link>
+        <Link to="/formulario" className="hover:text-gray-300">Novo Atendimento</Link>
       </nav>
-      <Routes>
-        <Route path="/" element={<Formulario />} />
-        <Route path="/tv" element={<TV />} />
-      </Routes>
-    </BrowserRouter>
+
+      <main className="p-8">
+        {/* Área onde a página da rota atual será renderizada */}
+        <Routes>
+          <Route path="/" element={<TV />} />
+          <Route path="/formulario" element={<Formulario />} />
+        </Routes>
+      </main>
+    </div>
   );
 }
 
 export default App;
-
