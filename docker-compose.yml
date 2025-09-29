@@ -6,9 +6,6 @@ services:
       - "3002:3000"
     volumes:
       - ./backend:/app
-    depends_on:
-      - frontend
-      - pgsql
     environment:
       - NODE_ENV=development
       - DB_HOST=pgsql
@@ -18,12 +15,19 @@ services:
       - DB_NAME=postgres
 
   frontend:
-    build: ./frontend
-    container_name: petshop-frontend
-    ports:
-      - "3001:80"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+      build:
+        context: ./frontend
+        # Usaremos um Dockerfile otimizado para desenvolvimento
+        dockerfile: Dockerfile.dev
+      container_name: petshop-frontend
+      ports:
+        - "3001:5173" # A porta do Vite é 5173, não 80
+      volumes:
+        # Mapeia o código-fonte e os node_modules para dentro do container
+        - ./frontend:/app
+        - /app/node_modules
+      environment:
+        - CHOKIDAR_USEPOLLING=true
 
   pgsql:
     image: postgres:12.17
