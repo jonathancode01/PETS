@@ -20,7 +20,10 @@ RUN npm run build
 
 # Estágio 2: Servidor de Produção com Nginx
 # Usamos uma imagem super leve do Nginx baseada em Alpine
-FROM nginx:stable-alpine
+FROM nginx:latest-alpine
+
+# Atualiza os pacotes para corrigir vulnerabilidades
+RUN apk update && apk upgrade
 
 # Remove a configuração padrão do Nginx
 RUN rm /etc/nginx/conf.d/default.conf
