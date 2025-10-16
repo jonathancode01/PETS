@@ -1,101 +1,141 @@
+// ======================
+// 📦 Importações
+// ======================
 const express = require('express');
 const Sequelize = require('sequelize');
 const axios = require('axios');
-const { v4: uuidv4 } = require('uuid'); // Para gerar senhas únicas
 
+// ======================
+// 🚀 Inicialização do App
+// ======================
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+// ======================
+// 🌐 Middleware CORS
+// ======================
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3001"); // frontend React
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// ======================
+// ⚙️ Middlewares
+// ======================
 app.use(express.json());
 
-// Configuração do Sequelize
-// Pega as variáveis de ambiente que o docker-compose está injetando
-const DB_USER = process.env.DB_USER;
-const DB_PASSWORD = process.env.DB_PASSWORD;
-const DB_HOST = process.env.DB_HOST; // No seu caso, será 'pgsql'
-const DB_NAME = process.env.DB_NAME;
-const DB_PORT = process.env.DB_PORT;
+// ======================
+// 🐘 Conexão com PostgreSQL
+// ======================
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'postgres',
+  process.env.DB_USER || 'postgres',
+  process.env.DB_PASSWORD || 'postgres',
+  {
+    host: process.env.DB_HOST || 'pgsql',
+    dialect: 'postgres',
+    port: process.env.DB_PORT || 5432,
+    logging: false,
+  }
+);
 
-// Configuração do Sequelize usando as variáveis de ambiente
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-  host: DB_HOST,
-  port: DB_PORT,
-  dialect: 'postgres',
-});
-
+// ======================
+// 🧱 Modelo da Tabela: Triagem
+// ======================
 const Triagem = sequelize.define('triagem', {
-  senha: Sequelize.STRING,
-  nome_tutor: Sequelize.STRING,
-  nome_pet: Sequelize.STRING,
-  porte: Sequelize.STRING,
-  descricao: Sequelize.TEXT,
-  status: Sequelize.STRING,
-  criado_em: Sequelize.DATE,
+  nome_tutor: { type: Sequelize.STRING, allowNull: false },
+  nome_pet: { type: Sequelize.STRING, allowNull: false },
+  porte: { type: Sequelize.STRING, allowNull: false },
+  descricao: { type: Sequelize.TEXT, allowNull: false },
+  diagnostico_ia: { type: Sequelize.TEXT, allowNull: true },
 });
 
-// Sincroniza o modelo com o banco (cria a tabela se não existir)
-sequelize.sync();
+// ======================
+// 🔄 Sincronização do Banco
+// ======================
+sequelize.sync( { force: true } )
+  .then(() => console.log('📦 Banco sincronizado com sucesso!'))
+  .catch(err => console.error('❌ Erro ao sincronizar banco:', err));
 
-// Endpoints
-app.get('/triagens', async (req, res) => {
-  try {
-    const triagens = await Triagem.findAll();
-    res.json(triagens);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao listar triagens' });
-  }
-});
+// ======================
+// 📍 Rotas CRUD
+// ======================
 
+// ➕ Criar triagem (CREATE)
 app.post('/triagens', async (req, res) => {
-  const { nome_tutor, nome_pet, porte, descricao } = req.body;
-
-  // Validação simples
-  if (!nome_tutor || !nome_pet || !porte || !descricao) {
-    return res.status(400).json({ error: 'Todos os campos são obrigatórios' });
-  }
-
   try {
-    // Geração automática de senha (ex: T001, T002...)
-    const senha = `T${uuidv4().slice(0, 3).toUpperCase()}`; // Exemplo simples
+    const { nome_tutor, nome_pet, porte, descricao } = req.body;
 
-    // Envia descrição para o serviço de IA
-    const iaResponse = await axios.post('http://ia_service:8000/predict', { descricao });
-    const status = iaResponse.data.status; // "Urgente", "Moderado", or "Normal"
+    // Chamada à IA opcional
+    let diagnostico = 'Não definido';
+    try {
+      const { data } = await axios.post('http://ia_service:8000/analisar', { descricao });
+      diagnostico = data.diagnostico || 'Não definido';
+    } catch (iaError) {
+      console.warn('⚠️ Erro ao consultar IA, usando diagnóstico padrão.');
+    }
 
-    // Salva no banco
-    const triagem = await Triagem.create({
-      senha,
-      nome_tutor,
-      nome_pet,
-      porte,
-      descricao,
-      status,
-    });
-
-    res.status(201).json(triagem);
+    const novaTriagem = await Triagem.create({ nome_tutor, nome_pet, porte, descricao, diagnostico_ia: diagnostico });
+    res.status(201).json(novaTriagem);
   } catch (error) {
+    console.error('Erro ao criar triagem:', error);
     res.status(500).json({ error: 'Erro ao criar triagem' });
   }
 });
 
+// 📋 Listar todas as triagens (READ)
+app.get('/triagens', async (req, res) => {
+  try {
+    const triagens = await Triagem.findAll({ order: [['id', 'DESC']] });
+    res.json(triagens);
+  } catch (error) {
+    console.error('Erro ao buscar triagens:', error);
+    res.status(500).json({ error: 'Erro ao buscar triagens' });
+  }
+});
+
+// ✏️ Atualizar triagem (UPDATE)
 app.put('/triagens/:id', async (req, res) => {
-  const { id } = req.params;
-  const updates = req.body;
   try {
-    await Triagem.update(updates, { where: { id } });
-    res.json({ message: 'Triagem atualizada' });
+    const { id } = req.params;
+    const { nome_tutor, nome_pet, porte, descricao } = req.body;
+
+    const triagem = await Triagem.findByPk(id);
+    if (!triagem) return res.status(404).json({ error: 'Triagem não encontrada' });
+
+    await triagem.update({ nome_tutor, nome_pet, porte, descricao });
+    res.json(triagem);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao atualizar' });
+    console.error('Erro ao atualizar triagem:', error);
+    res.status(500).json({ error: 'Erro ao atualizar triagem' });
   }
 });
 
+// ❌ Deletar triagem (DELETE)
 app.delete('/triagens/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    await Triagem.destroy({ where: { id } });
-    res.json({ message: 'Triagem removida' });
+    const { id } = req.params;
+    const triagem = await Triagem.findByPk(id);
+    if (!triagem) return res.status(404).json({ error: 'Triagem não encontrada' });
+
+    await triagem.destroy();
+    res.json({ message: 'Triagem deletada com sucesso' });
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao remover' });
+    console.error('Erro ao deletar triagem:', error);
+    res.status(500).json({ error: 'Erro ao deletar triagem' });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Backend rodando na porta ${PORT}`));
+// 🧭 Rota padrão
+app.get('/', (req, res) => {
+  res.send('🐾 API da Clínica Pet com IA funcionando!');
+});
+
+// 🔥 Inicialização do Servidor
+app.listen(PORT, '0.0.0.0', () => console.log(`🚀 Backend rodando na porta ${PORT}`));
