@@ -14,7 +14,7 @@ function TriagemForm() {
       return;
     }
     try {
-      await axios.post('http://backend:5000/triagens', formData);
+      await axios.post('http://localhost:3002/triagens', formData);
       toast.success('Triagem registrada com sucesso!');
       setFormData({ nome_tutor: '', nome_pet: '', porte: '', descricao: '' });
     } catch (error) {
