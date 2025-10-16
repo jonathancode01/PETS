@@ -15,8 +15,8 @@ Sistema web para triagem inteligente de pets.
    - `cd ia_service && pip install -r requirements.txt`
 3. Em `root/`, execute `docker-compose up --build`.
 4. Acesse:
-   - Formulário: http://localhost:3000
-   - Painel: http://localhost:3000/painel
+   - Formulário: http://localhost:5173
+   - Painel: http://localhost:5173/painel
 
 ## Scripts
 - Frontend: `npm run start` (em dev)
