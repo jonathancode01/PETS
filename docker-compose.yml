@@ -1,0 +1,63 @@
+services:
+  backend:
+    build: ./backend
+    container_name: petshop-backend
+    ports:
+      - "3002:3000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=pgsql
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=postgres
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - SESSION_SECRET=${SESSION_SECRET}
+    depends_on:
+      - pgsql
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: petshop-frontend
+    ports:
+      - "3001:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    depends_on:
+      - backend  # Adicionado para garantir ordem de execução
+
+  ia_service:
+    build: ./ia_service
+    container_name: ia_service
+    restart: always
+    volumes:
+      - ./ia_service:/app
+    ports:
+      - "8001:8000"
+    depends_on:
+      - pgsql
+
+  pgsql:
+    image: postgres:12.17
+    container_name: pgsql
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+volumes:
+  pgdata:
+  frontend_node_modules:
